@@ -256,13 +256,20 @@ sub nb_email_list_batch_result {
     if (exists($hash{job_id})) {
         $self->{job_id} = $hash{job_id};
     } else {
-        return (resp_status=>'error',data => {error => 'mandatory_value_missing',error_description => "The value for 'job_id' is missing.",request_data => ''});
+        return (resp_status=>'error',data => {error => 'mandatory_value_missing',error_description => "The value for 'job_id' is missing."},request_data => '');
     }
     my %check_status=$self->nb_email_list_batch_check(job_id=>$hash{job_id});
     if($check_status{resp_status} ne 'success'){
         return %check_status;
     } elsif($check_status{data}{status} ne '4') {
-        return (resp_status=>'error',data => {error => 'list_verification_completion_failure',error_description => $check_status{data}{status_desc},request_data => ''});
+        my %error_data = (
+            resp_status=>'error',
+            data => $check_status{data},
+            request_data => ''
+        );
+        $error_data{data}{error}='list_verification_completion_failure';
+        $error_data{data}{error_description}=$check_status{data}{status_desc};
+        return %error_data;
     }
     $self->{valids}     = ($hash{valids} eq '0')?$hash{valids}:'1';
     $self->{invalids}   = ($hash{invalids} eq '0')?$hash{invalids}:'1';
@@ -716,6 +723,17 @@ C<textcodes> => values permitted are B<0> and B<1>. If set B<0>, the reslut rece
 
 B<Example Response:>
 
+    (
+        resp_status     =>  'success',
+        data            =>  {
+            list    =>  $result->{_content}
+        },
+        request_data    => Dumper($result)
+    )
+
+
+B<Example C<$response{data}{list}> will be as follows:>
+
     valid@example.com,valid
     invalid@example.com,invalid
 
@@ -768,7 +786,7 @@ You can identify error from the response hash you receive when a function is bei
 The response will be as follows when an error occur:
 
     (
-        resp_status          =>  'error', 
+        resp_status     =>  'error', 
         data            =>  {
             error               => __, # defiens error type
             error_description   => __  # Describes the reson for the error
