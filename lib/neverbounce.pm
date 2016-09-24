@@ -768,7 +768,7 @@ You can identify error from the response hash you receive when a function is bei
 The response will be as follows when an error occur:
 
     (
-        status          =>  'error', 
+        resp_status          =>  'error', 
         data            =>  {
             error               => __, # defiens error type
             error_description   => __  # Describes the reson for the error
