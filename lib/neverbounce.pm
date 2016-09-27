@@ -67,7 +67,7 @@ sub _initialize {
     my $result=$ua->request($req);
     if($result->is_success && $result->{_content} ne '') {
         my $response=decode_json($result->{_content});
-        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 'true')) {
+        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 1)) {
             my %response_hash = %{$response};
             my %error_data = $self->nb_error(%response_hash);
             die Dumper(\%error_data);
@@ -110,7 +110,7 @@ sub nb_verify_email {
     my $result=$ua->request($req);
     if($result->is_success && $result->{_content} ne '') {
         my $response=decode_json($result->{_content});
-        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 'true')) {
+        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 1)) {
             my %response_hash = %{$response};
             my %error_data = $self->nb_error(%response_hash);
             $error_data{request_data} = Dumper($result);
@@ -167,7 +167,7 @@ sub nb_email_list_batch_send {
     my $result=$ua->request($req);
     if($result->is_success && $result->{_content} ne '') {
         my $response=decode_json($result->{_content});
-        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 'true')) {
+        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 1)) {
             my %response_hash = %{$response};
             my %error_data = $self->nb_error(%response_hash);
             $error_data{request_data} = Dumper($result);
@@ -215,7 +215,7 @@ sub nb_email_list_batch_check {
     my $result=$ua->request($req);
     if($result->is_success && $result->{_content} ne '') {
         my $response=decode_json($result->{_content});
-        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 'true')) {
+        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 1)) {
             my %response_hash = %{$response};
             my %error_data = $self->nb_error(%response_hash);
             $error_data{request_data} = Dumper($result);
@@ -297,13 +297,22 @@ sub nb_email_list_batch_result {
     $ua->ssl_opts( "verify_hostname" => 0 );
     $ua->agent('Mozilla/5.0');
     my $result=$ua->request($req);
+    $result->{_content}=~s/\n+$//;
+    $result->{_content}=~s/\r+$//;
+    $result->{_content}=~s/\n+$//;
     if($result->is_success && $result->{_content} ne '') {
-        my $response=decode_json($result->{_content});
-        if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 'true')) {
-            my %response_hash = %{$response};
-            my %error_data = $self->nb_error(%response_hash);
-            $error_data{request_data} = Dumper($result);
-            return %error_data;
+        my $temp=0;
+        eval {decode_json($result->{_content});$temp=1;1;} or do {$temp=0;};
+        if($temp > 0) {
+            my $response=decode_json($result->{_content});
+            if(defined($response->{error}) || (defined($response->{success}) && $response->{success} ne 1)) {
+                my %response_hash = %{$response};
+                my %error_data = $self->nb_error(%response_hash);
+                $error_data{request_data} = Dumper($result);
+                return %error_data;
+            } else {
+                return (resp_status=>'error',data => {error => 'Unknown Error',error_description => "Unknown Error"},request_data => Dumper($result));
+            }
         } else {
             my %response_data = (
                 resp_status     =>  'success',
@@ -326,33 +335,68 @@ sub nb_result_code {
     my $self = shift;
     my %hash = @_;
     my %result_codes = (
-        0   =>  {
+        0           =>  {
             text_code   =>  'valid',
+            numeric_code=>  '0',
             description =>  'Verified as real address',
             safe_to_send=>  'Yes'
         },
-        1   =>  {
+        1           =>  {
             text_code   =>  'invalid',
+            numeric_code=>  '1',
             description =>  'Verified as not valid',
             safe_to_send=>  'No'
         },
-        2   =>  {
+        2           =>  {
             text_code   =>  'disposable',
+            numeric_code=>  '2',
             description =>  'A temporary, disposable address',
             safe_to_send=>  'No'
         },
-        3   =>  {
+        3           =>  {
             text_code   =>  'catchall',
+            numeric_code=>  '3',
             description =>  'A domain-wide setting',
             safe_to_send=>  'Maybe. Not recommended unless on private server'
         },
-        4   =>  {
+        4           =>  {
             text_code   =>  'unknown',
+            numeric_code=>  '4',
+            description =>  'The server cannot be reached',
+            safe_to_send=>  'No'
+        },
+        'valid'     =>  {
+            text_code   =>  'valid',
+            numeric_code=>  '0',
+            description =>  'Verified as real address',
+            safe_to_send=>  'Yes'
+        },
+        'invalid'   =>  {
+            text_code   =>  'invalid',
+            numeric_code=>  '1',
+            description =>  'Verified as not valid',
+            safe_to_send=>  'No'
+        },
+        'disposable'=>  {
+            text_code   =>  'disposable',
+            numeric_code=>  '2',
+            description =>  'A temporary, disposable address',
+            safe_to_send=>  'No'
+        },
+        'catchall'  =>  {
+            text_code   =>  'catchall',
+            numeric_code=>  '3',
+            description =>  'A domain-wide setting',
+            safe_to_send=>  'Maybe. Not recommended unless on private server'
+        },
+        'unknown'   =>  {
+            text_code   =>  'unknown',
+            numeric_code=>  '4',
             description =>  'The server cannot be reached',
             safe_to_send=>  'No'
         }
     );
-    if($hash{result_code} && $hash{result_code} ne '' && $hash{result_code} < 5) {
+    if($hash{result_code} && $hash{result_code} ne '' && (($hash{result_code}=~/^\d+$/ && $hash{result_code} < 5) || $hash{result_code} eq 'valid' || $hash{result_code} eq 'invalid' || $hash{result_code} eq 'disposable' || $hash{result_code} eq 'catchall' || $hash{result_code} eq 'unknown')) {
         if($hash{response_type} && $hash{response_type} ne '') {
             if(defined($result_codes{$hash{result_code}}{$hash{response_type}})) {
                 return $result_codes{$hash{result_code}}{$hash{response_type}};
@@ -751,28 +795,63 @@ This method can be used to retrive the result codes, it's text code, description
 The response for the function will be returned as a hash and they are,
 
     (
-        0   =>  {
+        0           =>  {
             text_code   =>  'valid',
+            numeric_code=>  '0',
             description =>  'Verified as real address',
             safe_to_send=>  'Yes'
         },
-        1   =>  {
+        1           =>  {
             text_code   =>  'invalid',
+            numeric_code=>  '1',
             description =>  'Verified as not valid',
             safe_to_send=>  'No'
         },
-        2   =>  {
+        2           =>  {
             text_code   =>  'disposable',
+            numeric_code=>  '2',
             description =>  'A temporary, disposable address',
             safe_to_send=>  'No'
         },
-        3   =>  {
+        3           =>  {
             text_code   =>  'catchall',
+            numeric_code=>  '3',
             description =>  'A domain-wide setting',
             safe_to_send=>  'Maybe. Not recommended unless on private server'
         },
-        4   =>  {
+        4           =>  {
             text_code   =>  'unknown',
+            numeric_code=>  '4',
+            description =>  'The server cannot be reached',
+            safe_to_send=>  'No'
+        },
+        'valid'     =>  {
+            text_code   =>  'valid',
+            numeric_code=>  '0',
+            description =>  'Verified as real address',
+            safe_to_send=>  'Yes'
+        },
+        'invalid'   =>  {
+            text_code   =>  'invalid',
+            numeric_code=>  '1',
+            description =>  'Verified as not valid',
+            safe_to_send=>  'No'
+        },
+        'disposable'=>  {
+            text_code   =>  'disposable',
+            numeric_code=>  '2',
+            description =>  'A temporary, disposable address',
+            safe_to_send=>  'No'
+        },
+        'catchall'  =>  {
+            text_code   =>  'catchall',
+            numeric_code=>  '3',
+            description =>  'A domain-wide setting',
+            safe_to_send=>  'Maybe. Not recommended unless on private server'
+        },
+        'unknown'   =>  {
+            text_code   =>  'unknown',
+            numeric_code=>  '4',
             description =>  'The server cannot be reached',
             safe_to_send=>  'No'
         }
