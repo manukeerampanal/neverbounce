@@ -16,10 +16,21 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
+		'Data::Dumper'	=>	0,
+		'Convert::Base64'	=>	0,
+		'HTTP::Request::Common'	=>	0,
+		'LWP::UserAgent'	=>	0,
+		'JSON'	=>	0,
+		'LWP::Protocol::https'	=>	0
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Test::More' => 0,
+		'Data::Dumper'	=>	0,
+		'Convert::Base64'	=>	0,
+		'HTTP::Request::Common'	=>	0,
+		'LWP::UserAgent'	=>	0,
+		'JSON'	=>	0,
+		'LWP::Protocol::https'	=>	0
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'neverbounce-*' },

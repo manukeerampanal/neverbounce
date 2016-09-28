@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use JSON;
 require Exporter;
 $NB_API_VERSION = '3.1';
-our $VERSION    = '0.01';
+our $VERSION    = '0.02';
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw();
 %result_details = (
@@ -451,7 +451,7 @@ neverbounce - neverbounce.com email verification API integration module
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 
 =head1 Synopsis
@@ -919,6 +919,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * GitHub: Development tracker (report bugs and suggesitions here)
+
+L<https://github.com/manukeerampanal/neverbounce>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
