@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use JSON;
 require Exporter;
 $NB_API_VERSION = '3.1';
-our $VERSION    = '0.02';
+our $VERSION    = '0.04';
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw();
 %result_details = (
@@ -451,7 +451,7 @@ neverbounce - neverbounce.com email verification API integration module
 
 =head1 VERSION
 
-Version 0.02
+Version 0.04
 
 
 =head1 Synopsis
@@ -463,8 +463,13 @@ Version 0.02
     #OR
     
     use neverbounce;
-    my $neverbounce = neverbounce->new(api_username => 'DwxtvXg0', api_secret_key => 'WsryzB2F7#6RcH$') or die "Failed to initialize";
-    my %email_verify_send = $neverbounce->nb_email_list_batch_send(input_location => 0, input => 'http://www.example.com/folder/file_123_999.csv', filename => 'NB_01_01_2016.csv');
+    my $neverbounce = neverbounce->new(api_username => 'DwxtvXg0', api_secret_key => 'WsryzB2F7#6RcH$')
+        or die "Failed to initialize";
+    my %email_verify_send = $neverbounce->nb_email_list_batch_send(
+        input_location => 0,
+        input => 'http://www.example.com/folder/file_123_999.csv',
+        filename => 'NB_01_01_2016.csv'
+    );
     
     my %email_verify_send_check = $neverbounce->nb_email_list_batch_check(job_id => '123456');
     
@@ -537,15 +542,23 @@ The response for the function will be returned as a hash and they are,
     (
         resp_status     =>  'success',  # status for the request. Expected values are 'success' and 'error'
         data            =>  {
-            result_code                 =>  __, # The result code. Expected Values : 0 / 1 / 2 / 3 / 4
-            result_text_code            =>  __, # The text code for the result_code. Expected Values : valid / invalid / disposable / catchall /unknown
-            result_description          =>  __, # The description for the result code
-            result_safe_to_send         =>  __, # The recommendation regarding whether to use this email addres for sending email
-            result_details_code         =>  __, # Reson Code for error. Expected Values : 0 / 1
-            result_details_description  =>  __, # Description for 'result_details_code'
-            neverbounce_execution_time  =>  __  # Time consumed by neverbounce.com for processing request
+            result_code                 =>  __,
+                # The result code. Expected Values : 0 / 1 / 2 / 3 / 4
+            result_text_code            =>  __,
+                # The text code for the result_code. Expected Values : valid / invalid / disposable / catchall /unknown
+            result_description          =>  __,
+                # The description for the result code
+            result_safe_to_send         =>  __,
+                # The recommendation regarding whether to use this email addres for sending email
+            result_details_code         =>  __,
+                # Reson Code for error. Expected Values : 0 / 1
+            result_details_description  =>  __,
+                # Description for 'result_details_code'
+            neverbounce_execution_time  =>  __
+                # Time consumed by neverbounce.com for processing request
         },
-        request_data    => __  # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+        request_data    => __
+            # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
     )
 
 
@@ -628,11 +641,15 @@ The response for the function will be returned as a hash and they are,
     (
         resp_status     =>  'success', # status for the request. Expected values are 'success' and 'error'
         data            =>  {
-            job_status                  =>  __, # Processing status of the current submitted email batch file. Response will be '0'
-            job_id                      =>  __, # Job id assigned by the neverbounce.com for the submitted process
-            neverbounce_execution_time  =>  __  # Time consumed by neverbounce.com for processing request
+            job_status                  =>  __,
+                # Processing status of the current submitted email batch file. Response will be '0'
+            job_id                      =>  __,
+                # Job id assigned by the neverbounce.com for the submitted process
+            neverbounce_execution_time  =>  __
+                # Time consumed by neverbounce.com for processing request
         },
-        request_data    =>  __  # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+        request_data    =>  __
+            # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
     )
 
 Once you get a response you'll want to store the value of C<job_id>, as it will be used to check the status and eventually retrieve the results. Now you're ready to start checking the status of the verification.
@@ -651,8 +668,10 @@ The response for the function will be returned as a hash and they are,
     (
         resp_status     =>  'success', # status for the request. Expected values are 'success' and 'error'
         data            =>  {
-            status                      =>  __, # The processing status for the requested job. Expected values: 0 /  1 / 2 / 3 / 4 / 5
-            status_desc                 =>  __, # The descripton for the parameter 'status'
+            status                      =>  __,
+                # The processing status for the requested job. Expected values: 0 /  1 / 2 / 3 / 4 / 5
+            status_desc                 =>  __,
+                # The descripton for the parameter 'status'
             id                          =>  __,
             type                        =>  __,
             input_location              =>  __,
@@ -677,7 +696,8 @@ The response for the function will be returned as a hash and they are,
                 job_time    =>  __, # time used to process the processed records
             }
         },
-        request_data    =>   __  # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+        request_data    =>   __
+            # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
     )
 
 In the response, the C<status> parameter will indicate what the list is currently doing. You can find a table of status C<codes> below. Typically C<status> will be the only parameter you will need to watch. However, you may find the C<stats> object useful for seeing a breakdown of the results in your list while it's processing. You can also use the C<processed> and C<billable> values in the C<stats> object to track the progress of the verification.
@@ -870,7 +890,8 @@ The response will be as follows when an error occur:
             error               => __, # defiens error type
             error_description   => __  # Describes the reson for the error
         },
-        request_data    =>  __  # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+        request_data    =>  __
+            # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
     )
 
 The parameter C<request_data> will be filled with value when the request is passed to never bounce. Else it will be left blank. It will be mostly left bank only when you missed some mandatory values.
