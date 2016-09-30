@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use JSON;
 require Exporter;
 $NB_API_VERSION = '3.1';
-our $VERSION    = '0.04';
+our $VERSION    = '0.05';
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw();
 %result_details = (
@@ -451,7 +451,7 @@ neverbounce - neverbounce.com email verification API integration module
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 
 =head1 Synopsis
