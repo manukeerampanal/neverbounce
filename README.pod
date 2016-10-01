@@ -404,10 +404,17 @@ In this case you can find the error in your server error logs (I<if it's present
 
 To install this module, run the following commands:
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+OR
+
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
 
 =head1 SUPPORT AND DOCUMENTATION
 

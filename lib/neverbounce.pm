@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use JSON;
 require Exporter;
 $NB_API_VERSION = '3.1';
-our $VERSION    = '0.05';
+our $VERSION    = '0.06';
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw();
 %result_details = (
@@ -451,13 +451,14 @@ neverbounce - neverbounce.com email verification API integration module
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 
 =head1 Synopsis
 
     use neverbounce;
-    my $neverbounce = neverbounce->new(api_username => 'DwxtvXg0', api_secret_key => 'WsryzB2F7#6RcH$') or die "Failed to initialize";
+    my $neverbounce = neverbounce->new(api_username => 'DwxtvXg0', api_secret_key => 'WsryzB2F7#6RcH$')
+        or die "Failed to initialize";
     my %email_verify_result = $neverbounce->nb_verify_email(email => 'test@example.com');
     
     #OR
@@ -574,7 +575,8 @@ The response for the function will be returned as a hash and they are,
     |unknown 	| 4 	        | The server cannot be reached      | No                                                |
     +-----------+---------------+-----------------------------------+---------------------------------------------------+
     
-    You can also find the result_code data from the following link : https://neverbounce.com/help/getting-started/result-codes/
+    You can also find the result_code data from the following link :
+        https://neverbounce.com/help/getting-started/result-codes/
 
 B<Please Note: Results are not available via the user dashboard and should be stored on the user's requesting end.>
 
@@ -649,7 +651,7 @@ The response for the function will be returned as a hash and they are,
                 # Time consumed by neverbounce.com for processing request
         },
         request_data    =>  __
-            # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+            # this contains Dumper() value of HTTP request-response between the neverbounce.com and requesting server
     )
 
 Once you get a response you'll want to store the value of C<job_id>, as it will be used to check the status and eventually retrieve the results. Now you're ready to start checking the status of the verification.
