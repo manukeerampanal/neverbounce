@@ -19,7 +19,8 @@ WriteMakefile(
 		'HTTP::Request::Common' =>	0,
 		'LWP::UserAgent'	    =>	0,
 		'JSON'	                =>	0,
-		'LWP::Protocol::https'	=>	0
+		'LWP::Protocol::https'	=>	0,
+        'Module::Build'         =>  0
     },
     clean => { FILES => 'neverbounce-*' },
 );

@@ -30,7 +30,8 @@
             "LWP::Protocol::https" : "0",
             "LWP::UserAgent" : "0",
             "Test::Manifest" : "0.9",
-            "Test::More" : "0"
+            "Test::More" : "0",
+            "Module::Build" : "0"
          }
       }
    },

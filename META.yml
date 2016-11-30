@@ -24,4 +24,5 @@ requires:
   LWP::UserAgent: '0'
   Test::Manifest: '0.9'
   Test::More: '0'
+  Module::Build : '0'
 version: '0.06'
