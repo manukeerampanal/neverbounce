@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Neverbounce by manukeerampanal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Neverbounce</h1>
+      <h2 class="project-tagline">Perl module for neverbounce.com API integration</h2>
+      <a href="https://github.com/manukeerampanal/neverbounce" class="btn">View on GitHub</a>
+      <a href="https://github.com/manukeerampanal/neverbounce/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/manukeerampanal/neverbounce/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="name" class="anchor" href="#name" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Name</h1>
+
+<p>neverbounce - neverbounce.com email verification API integration module </p>
+
+<h1>
+<a id="version" class="anchor" href="#version" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>VERSION</h1>
+
+<p>Version 0.06</p>
+
+<h1>
+<a id="synopsis" class="anchor" href="#synopsis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Synopsis</h1>
+
+<pre><code>use neverbounce;
+my $neverbounce = neverbounce-&gt;new(api_username =&gt; 'DwxtvXg0', api_secret_key =&gt; 'WsryzB2F7#6RcH$')
+    or die "Failed to initialize";
+my %email_verify_result = $neverbounce-&gt;nb_verify_email(email =&gt; 'test@example.com');
+
+#OR
+
+use neverbounce;
+my $neverbounce = neverbounce-&gt;new(api_username =&gt; 'DwxtvXg0', api_secret_key =&gt; 'WsryzB2F7#6RcH$')
+    or die "Failed to initialize";
+my %email_verify_send = $neverbounce-&gt;nb_email_list_batch_send(
+    input_location =&gt; 0,
+    input =&gt; 'http://www.example.com/folder/file_123_999.csv',
+    filename =&gt; 'NB_01_01_2016.csv'
+);
+
+my %email_verify_send_check = $neverbounce-&gt;nb_email_list_batch_check(job_id =&gt; '123456');
+
+my %email_verify_send_result = $neverbounce-&gt;nb_email_list_batch_result(job_id =&gt; '123456');
+
+my %result_codes = $neverbounce-&gt;nb_result_code();
+</code></pre>
+
+<h1>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h1>
+
+<p>The <code>neverbounce</code> is a class implementing API integration to neverbounce.com for verifying email addresses submitted to it.</p>
+
+<p>Neverbounce.com provide 2 methods to submit email ids to them.</p>
+
+<ol>
+<li>Submit single email address at a time. (Verify an email)</li>
+<li>
+<p>Batch email address submission. (Verifying a list)</p>
+
+<p>In the 2nd section, we can submit data in 2 means.</p>
+
+<ul>
+<li>Store the file to a csv list and store it to a place where it can be accessed publically. Then submit the URL for file to the neverbounce.comIn this method, the neverbounce.com will access the '.csv' file from their part to process it.</li>
+<li>Directly submit the entire list as POST method to the neverbounce.com</li>
+</ul>
+</li>
+</ol>
+
+<h2>
+<a id="api-initiation-and-authentication" class="anchor" href="#api-initiation-and-authentication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API Initiation and Authentication</h2>
+
+<pre><code>$neverbounce = neverbounce-&gt;new( %options ) or die "Failed to initialize";
+</code></pre>
+
+<p>This method intiates the request to the neverbounce.com and gets the <code>access_token</code> which is required for further processing. The <code>access_token</code> is normally valid for an hour and used for any number of requests.</p>
+
+<p>The following options correspond to attribute methods described below:</p>
+
+<pre><code>+---------------+----------------------------------------+
+|Key            | Value                                  |
++---------------+----------------------------------------+
+|api_username   | &lt;API Username&gt;                         |
+|api_secret_key | &lt;API Secret Key&gt;                       |
++---------------+----------------------------------------+
+</code></pre>
+
+<p>Nevebounce uses OAuth 2.0 authentication model. This requires you to make an initial request for an <code>access token</code> before making verification requests.
+<strong>API Username</strong> and <strong>API Secret Key</strong> are available at 'API Credentials' in the user account of neverbounce.com</p>
+
+<h2>
+<a id="verifying-an-email" class="anchor" href="#verifying-an-email" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Verifying an Email</h2>
+
+<pre><code>my %email_verify_result = $neverbounce-&gt;nb_verify_email( email =&gt; 'test@example.com' );
+</code></pre>
+
+<p>This method is used to validate an email address in realtime. The parameter <code>email</code> is mandatory to process this function.</p>
+
+<p>The response for the function will be returned as a hash and they are,</p>
+
+<pre><code>(
+    resp_status     =&gt;  'success',  # status for the request. Expected values are 'success' and 'error'
+    data            =&gt;  {
+        result_code                 =&gt;  __,
+            # The result code. Expected Values : 0 / 1 / 2 / 3 / 4
+        result_text_code            =&gt;  __,
+            # The text code for the result_code. Expected Values : valid / invalid / disposable / catchall /unknown
+        result_description          =&gt;  __,
+            # The description for the result code
+        result_safe_to_send         =&gt;  __,
+            # The recommendation regarding whether to use this email addres for sending email
+        result_details_code         =&gt;  __,
+            # Reson Code for error. Expected Values : 0 / 1
+        result_details_description  =&gt;  __,
+            # Description for 'result_details_code'
+        neverbounce_execution_time  =&gt;  __
+            # Time consumed by neverbounce.com for processing request
+    },
+    request_data    =&gt; __
+        # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+)
+</code></pre>
+
+<h3>
+<a id="result-code" class="anchor" href="#result-code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Result Code</h3>
+
+<pre><code>+-----------+---------------+-----------------------------------+---------------------------------------------------+
+|Text Code  | Numeric Code  | Description                       | Safe to Send?                                     |
++-----------+---------------+-----------------------------------+---------------------------------------------------+
+|valid      | 0             | Verified as real address          | Yes                                               |
+|invalid    | 1             | Verified as not valid             | No                                                |
+|disposable | 2             | A temporary, disposable address   | No                                                |
+|catchall   | 3             | A domain-wide setting (learn more)| Maybe. Not recommended unless on private server   |
+|unknown    | 4             | The server cannot be reached      | No                                                |
++-----------+---------------+-----------------------------------+---------------------------------------------------+
+
+You can also find the result_code data from the following link :
+    https://neverbounce.com/help/getting-started/result-codes/
+</code></pre>
+
+<p><strong>Please Note: Results are not available via the user dashboard and should be stored on the user's requesting end.</strong></p>
+
+<h3>
+<a id="result-detail-codes" class="anchor" href="#result-detail-codes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Result Detail Codes</h3>
+
+<pre><code>+---------------+-------------------------------------------+
+| Value         | Description                               |
++---------------+-------------------------------------------+
+| 0             | No additional details                     |
+| 1             | Provided email failed the syntax check    |
++---------------+-------------------------------------------+
+</code></pre>
+
+<h2>
+<a id="verifying-a-list" class="anchor" href="#verifying-a-list" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Verifying a List</h2>
+
+<p>With the NeverBounce API you are able to verify your existing contact lists without ever needing to upload a list to the dashboard.</p>
+
+<h3>
+<a id="adding-a-list" class="anchor" href="#adding-a-list" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adding a List</h3>
+
+<p>To get started you first need to aggregate your data into a CSV format. Each row can only contain a single email and all emails should be in the same column.</p>
+
+<p>Click following link to learn more about formatting your list. (<a href="https://neverbounce.com/help/getting-started/uploading-a-file/">https://neverbounce.com/help/getting-started/uploading-a-file/</a>)</p>
+
+<p>Once aggregated this list can be submitted either directly as a URL encoded string or by submitting a public URL to the CSV. For larger lists the latter method is preferred. If you receive a <code>413 Request Entity Too Large</code> http error, you should try submitting a public URL to the CSV instead.</p>
+
+<p>When you submit a list via the API the verification process will start automatically. If your credit balance is insufficient the verification of your list will fail. You can purchase credits in bulk from the dashboard or submit a request(<a href="https://app.neverbounce.com/settings/billing">https://app.neverbounce.com/settings/billing</a>) to use neverbounce.com monthly billing option. You can also choose to run a free analysis rather than verifying your list, see <a href="https://neverbounce.com/help/api/running-a-free-analysis/">https://neverbounce.com/help/api/running-a-free-analysis/</a>.</p>
+
+<pre><code>my %email_verify_send = $neverbounce-&gt;nb_email_list_batch_send( %option );
+</code></pre>
+
+<p>This method is used when there is more than one email address to be verified at a single request. The options permitted are as follows :</p>
+
+<pre><code>%option = (
+    input_location =&gt; 0,
+    input =&gt; 'http://www.example.com/folder/file_123_999.csv',
+    filename =&gt; 'NB_01_01_2016.csv'
+);
+</code></pre>
+
+<p>The parameters <code>input_location</code> and <code>input</code> are mandatory and <code>filename</code> is optional.</p>
+
+<ul>
+<li>The permited value for the parameter <code>input_location</code> is either <strong>0</strong> or <strong>1</strong>.</li>
+<li>If <code>input_location</code> is set as <strong>0</strong>, then value of <code>input</code> is expected to be the a URL to the list.</li>
+<li>If <code>input_location</code> is set as <strong>1</strong>, then value of <code>input</code> is expected to be the a URL encoded string of the contents of the list.</li>
+<li>
+<code>filename</code> is optional, but do suggest supplying it as it will be useful for identifying your list in the user account dashboard of the neverbounce.com.</li>
+</ul>
+
+<p>The response for the function will be returned as a hash and they are,</p>
+
+<pre><code>(
+    resp_status     =&gt;  'success', # status for the request. Expected values are 'success' and 'error'
+    data            =&gt;  {
+        job_status                  =&gt;  __,
+            # Processing status of the current submitted email batch file. Response will be '0'
+        job_id                      =&gt;  __,
+            # Job id assigned by the neverbounce.com for the submitted process
+        neverbounce_execution_time  =&gt;  __
+            # Time consumed by neverbounce.com for processing request
+    },
+    request_data    =&gt;  __
+        # this contains Dumper() value of HTTP request-response between the neverbounce.com and requesting server
+)
+</code></pre>
+
+<p>Once you get a response you'll want to store the value of <code>job_id</code>, as it will be used to check the status and eventually retrieve the results. Now you're ready to start checking the status of the verification.</p>
+
+<h3>
+<a id="checking-the-status" class="anchor" href="#checking-the-status" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Checking the status</h3>
+
+<p>Now that your list is running, you will need to poll the API and check the status periodically. For <strong>smaller lists</strong> (&lt;50k) polling **every 5-10 seconds is acceptable**, but for **larger lists** (&gt;50k) you'll want to <strong>poll less frequently</strong>.</p>
+
+<pre><code>my %email_verify_send_check = $neverbounce-&gt;nb_email_list_batch_check(job_id =&gt; '123456');
+</code></pre>
+
+<p>This method is used to check the processing status of the email list batch file. The paramtere <code>job_id</code> is mandatory for the function to process. <a href="https://metacpan.org/pod/Adding&amp;#x20;a&amp;#x20;List">Click Here</a> to know how to retrive the value for <code>job_id</code>.</p>
+
+<p>The response for the function will be returned as a hash and they are,</p>
+
+<pre><code>(
+    resp_status     =&gt;  'success', # status for the request. Expected values are 'success' and 'error'
+    data            =&gt;  {
+        status                      =&gt;  __,
+            # The processing status for the requested job. Expected values: 0 /  1 / 2 / 3 / 4 / 5
+        status_desc                 =&gt;  __,
+            # The descripton for the parameter 'status'
+        id                          =&gt;  __,
+        type                        =&gt;  __,
+        input_location              =&gt;  __,
+        orig_name                   =&gt;  __,
+        created                     =&gt;  __,
+        started                     =&gt;  __,
+        finished                    =&gt;  __,
+        file_details                =&gt;  __,
+        job_details                 =&gt;  __,
+        neverbounce_execution_time  =&gt;  __, # Time consumed by neverbounce.com for processing request
+        stats                       =&gt;  {
+            total       =&gt;  __, # total records submitted
+            processed   =&gt;  __, # total records processed
+            valid       =&gt;  __, # no of valid records among processed records
+            invalid     =&gt;  __, # no of invalid records among processed records
+            bad_syntax  =&gt;  __, # no of bad syntaxed records among processed records
+            catchall    =&gt;  __, # no of catchall records among processed records
+            disposable  =&gt;  __, # no of disposable records among processed records
+            unknown     =&gt;  __, # no of unknown records among processed records
+            duplicates  =&gt;  __, # no of duplicate records among processed records
+            billable    =&gt;  __, # no of billable records among processed records
+            job_time    =&gt;  __, # time used to process the processed records
+        }
+    },
+    request_data    =&gt;   __
+        # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+)
+</code></pre>
+
+<p>In the response, the <code>status</code> parameter will indicate what the list is currently doing. You can find a table of status <code>codes</code> below. Typically <code>status</code> will be the only parameter you will need to watch. However, you may find the <code>stats</code> object useful for seeing a breakdown of the results in your list while it's processing. You can also use the <code>processed</code> and <code>billable</code> values in the <code>stats</code> object to track the progress of the verification.</p>
+
+<p>Once the <code>status</code> value is <code>4</code> you're ready to <a href="https://metacpan.org/pod/retrieving_the_results">retrieve the results</a>.</p>
+
+<h4>
+<a id="status-codes" class="anchor" href="#status-codes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Status Codes</h4>
+
+<pre><code>+---------------+--------------------------------------------------------------------------------------------+
+| Value         | Description                                                                                |
++---------------+--------------------------------------------------------------------------------------------+
+| 0             | Request has been received but has not started idexing                                      |
+| 1             | List is indexing and deduping                                                              |
+| 2             | List is awaiting user input (Typically skipped for lists submitted via API)                |
+| 3             | List is being processed                                                                    |
+| 4             | List has completed verification                                                            |
+| 5             | List has failed (Click following link to learn how to fix a failed list)                   |
+|               | &lt;https://neverbounce.com/help/getting-started/uploading-a-file/#fixing-a-failed-list&gt;      |
++---------------+--------------------------------------------------------------------------------------------+
+</code></pre>
+
+<h3>
+<a id="retrieving-the-results" class="anchor" href="#retrieving-the-results" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Retrieving the Results</h3>
+
+<p>Once the <a href="#checking-the-status">"Checking the status"</a> returns the value for the parameter <code>status</code> as <code>4</code>, we can retive the results from the neverbounce.com.</p>
+
+<pre><code>my %email_verify_send_result = $neverbounce-&gt;nb_email_list_batch_result( %option );
+</code></pre>
+
+<p>This method is used to retirive the result from the neverbounce.com. The options permitted are as follows :</p>
+
+<pre><code>%option = (
+    job_id      =&gt;  '12345',
+    valids      =&gt;  1,
+    invalids    =&gt;  1,
+    catchall    =&gt;  1,
+    disposable  =&gt;  1,
+    unknown     =&gt;  1,
+    duplicates  =&gt;  1,
+    textcodes   =&gt;  1,
+)
+</code></pre>
+
+<p>The parameter <code>job_id</code> is manadatory. The rest are optional.</p>
+
+<ul>
+<li>
+<code>valids</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit valid values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<code>invalids</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit invalid values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<code>catchall</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit catchall values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<code>disposable</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit disposable values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<code>unknown</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit unknown values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<code>duplicates</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will omit duplicate values</strong>. The <strong>default</strong> value is <strong>1</strong>.</li>
+<li>
+<p><code>textcodes</code> =&gt; values permitted are <strong>0</strong> and <strong>1</strong>. If set <strong>0</strong>, the reslut received from the server <strong>will give numeric result codes</strong>. Else it will be text code alternate to numeric code. <a href="https://metacpan.org/pod/Result&amp;#x20;Code">Click here</a> to know the definition for the result codes. The <strong>default</strong> value is <strong>1</strong>.</p>
+
+<p>+---------------+-------------------------------------------------------------------------------+
+|Parameter      | Value                                                                         |
++---------------+-------------------------------------------------------------------------------+
+|valids         | Include valid emails                                                          |
+|invalids       | Include invalid emails                                                        |
+|catchall       | Include catchall emails                                                       |
+|disposable     | Include disposable emails                                                     |
+|unknown        | Include unknown emails                                                        |
+|duplicates     | Include duplicated emails (duplicates will have the same verification result) |
+|textcodes      | Result codes will be returned as english words instead of numbers             |
++---------------+-------------------------------------------------------------------------------+</p>
+</li>
+</ul>
+
+<p><strong>Example Response:</strong></p>
+
+<pre><code>(
+    resp_status     =&gt;  'success',
+    data            =&gt;  {
+        list    =&gt;  $result-&gt;{_content}
+    },
+    request_data    =&gt; Dumper($result)
+)
+</code></pre>
+
+<p><strong>Example <code>$response{data}{list}</code> will be as follows:</strong></p>
+
+<pre><code>valid@example.com,valid
+invalid@example.com,invalid
+</code></pre>
+
+<p>The data will be returned in a CSV format with the last column containing the result codes. This will look familiar if you've verified a list through the dashboard.</p>
+
+<h3>
+<a id="retrieving-results-codes" class="anchor" href="#retrieving-results-codes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Retrieving Results Codes</h3>
+
+<pre><code>my %result_codes = $neverbounce-&gt;nb_result_code();
+</code></pre>
+
+<p>This method can be used to retrive the result codes, it's text code, descriptions and recommendation regarding whether an email id get verified.</p>
+
+<p>The response for the function will be returned as a hash and they are,</p>
+
+<pre><code>(
+    0           =&gt;  {
+        text_code   =&gt;  'valid',
+        numeric_code=&gt;  '0',
+        description =&gt;  'Verified as real address',
+        safe_to_send=&gt;  'Yes'
+    },
+    1           =&gt;  {
+        text_code   =&gt;  'invalid',
+        numeric_code=&gt;  '1',
+        description =&gt;  'Verified as not valid',
+        safe_to_send=&gt;  'No'
+    },
+    2           =&gt;  {
+        text_code   =&gt;  'disposable',
+        numeric_code=&gt;  '2',
+        description =&gt;  'A temporary, disposable address',
+        safe_to_send=&gt;  'No'
+    },
+    3           =&gt;  {
+        text_code   =&gt;  'catchall',
+        numeric_code=&gt;  '3',
+        description =&gt;  'A domain-wide setting',
+        safe_to_send=&gt;  'Maybe. Not recommended unless on private server'
+    },
+    4           =&gt;  {
+        text_code   =&gt;  'unknown',
+        numeric_code=&gt;  '4',
+        description =&gt;  'The server cannot be reached',
+        safe_to_send=&gt;  'No'
+    },
+    'valid'     =&gt;  {
+        text_code   =&gt;  'valid',
+        numeric_code=&gt;  '0',
+        description =&gt;  'Verified as real address',
+        safe_to_send=&gt;  'Yes'
+    },
+    'invalid'   =&gt;  {
+        text_code   =&gt;  'invalid',
+        numeric_code=&gt;  '1',
+        description =&gt;  'Verified as not valid',
+        safe_to_send=&gt;  'No'
+    },
+    'disposable'=&gt;  {
+        text_code   =&gt;  'disposable',
+        numeric_code=&gt;  '2',
+        description =&gt;  'A temporary, disposable address',
+        safe_to_send=&gt;  'No'
+    },
+    'catchall'  =&gt;  {
+        text_code   =&gt;  'catchall',
+        numeric_code=&gt;  '3',
+        description =&gt;  'A domain-wide setting',
+        safe_to_send=&gt;  'Maybe. Not recommended unless on private server'
+    },
+    'unknown'   =&gt;  {
+        text_code   =&gt;  'unknown',
+        numeric_code=&gt;  '4',
+        description =&gt;  'The server cannot be reached',
+        safe_to_send=&gt;  'No'
+    }
+)
+</code></pre>
+
+<h1>
+<a id="error-handling" class="anchor" href="#error-handling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Error Handling</h1>
+
+<p>You can identify error from the response hash you receive when a function is being called. To make sure your request is a success, check the value for the parameter <code>resp_status</code>. It will be <strong>success</strong>, if your request processed succesfully. If it's <strong>error</strong>, Then your request has failed to processed. You can find the error data from the response.</p>
+
+<p>The response will be as follows when an error occur:</p>
+
+<pre><code>(
+    resp_status     =&gt;  'error', 
+    data            =&gt;  {
+        error               =&gt; __, # defiens error type
+        error_description   =&gt; __  # Describes the reson for the error
+    },
+    request_data    =&gt;  __
+        # this contains Dumper() value of HTTP request - response between the neverbounce.com and requesting server
+)
+</code></pre>
+
+<p>The parameter <code>request_data</code> will be filled with value when the request is passed to never bounce. Else it will be left blank. It will be mostly left bank only when you missed some mandatory values.</p>
+
+<p>There is a condition when the module returns nothing. It will be occured when you call the method <code>neverbounce-</code>new()&gt; and there the method faces following situations :</p>
+
+<ol>
+<li>Failed to establish the connection with neverbounce.com</li>
+<li>Connection established but no data retrived from neverbounce.com</li>
+<li>Values provided for <code>api_username</code> and <code>api_secret_key</code> are invalid or expired.</li>
+</ol>
+
+<p>In this case you can find the error in your server error logs (<em>if it's present</em>);</p>
+
+<h1>
+<a id="author" class="anchor" href="#author" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AUTHOR</h1>
+
+<p>Manu Mathew, <code>&lt;whitewind at cpan.org&gt;</code></p>
+
+<h1>
+<a id="bugs" class="anchor" href="#bugs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>BUGS</h1>
+
+<p>Please report any bugs or feature requests to <code>bug-neverbounce at rt.cpan.org</code>, or through
+the web interface at <a href="http://rt.cpan.org/NoAuth/ReportBug.html?Queue=neverbounce">http://rt.cpan.org/NoAuth/ReportBug.html?Queue=neverbounce</a>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.</p>
+
+<h1>
+<a id="support" class="anchor" href="#support" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SUPPORT</h1>
+
+<p>You can find documentation for this module with the perldoc command.</p>
+
+<pre><code>perldoc neverbounce
+</code></pre>
+
+<p>You can also look for information at:</p>
+
+<ul>
+<li>
+<p>GitHub: Development tracker (report bugs and suggesitions here)</p>
+
+<p><a href="https://github.com/manukeerampanal/neverbounce">https://github.com/manukeerampanal/neverbounce</a></p>
+</li>
+<li>
+<p>RT: CPAN's request tracker (report bugs here)</p>
+
+<p><a href="http://rt.cpan.org/NoAuth/Bugs.html?Dist=neverbounce">http://rt.cpan.org/NoAuth/Bugs.html?Dist=neverbounce</a></p>
+</li>
+<li>
+<p>AnnoCPAN: Annotated CPAN documentation</p>
+
+<p><a href="http://annocpan.org/dist/neverbounce">http://annocpan.org/dist/neverbounce</a></p>
+</li>
+<li>
+<p>CPAN Ratings</p>
+
+<p><a href="http://cpanratings.perl.org/d/neverbounce">http://cpanratings.perl.org/d/neverbounce</a></p>
+</li>
+<li>
+<p>Search CPAN</p>
+
+<p><a href="http://search.cpan.org/dist/neverbounce/">http://search.cpan.org/dist/neverbounce/</a></p>
+</li>
+</ul>
+
+<h1>
+<a id="acknowledgements" class="anchor" href="#acknowledgements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ACKNOWLEDGEMENTS</h1>
+
+<h1>
+<a id="license-and-copyright" class="anchor" href="#license-and-copyright" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LICENSE AND COPYRIGHT</h1>
+
+<p>Copyright 2016 Manu Mathew.</p>
+
+<p>This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0). You may obtain a
+copy of the full license at:</p>
+
+<p><a href="http://www.perlfoundation.org/artistic_license_2_0">http://www.perlfoundation.org/artistic_license_2_0</a></p>
+
+<p>Any use, modification, and distribution of the Standard or Modified
+Versions is governed by this Artistic License. By using, modifying or
+distributing the Package, you accept this license. Do not use, modify,
+or distribute the Package, if you do not accept this license.</p>
+
+<p>If your Modified Version has been derived from a Modified Version made
+by someone other than you, you are nevertheless required to ensure that
+your Modified Version complies with the requirements of this license.</p>
+
+<p>This license does not grant you the right to use any trademark, service
+mark, tradename, or logo of the Copyright Holder.</p>
+
+<p>This license includes the non-exclusive, worldwide, free-of-charge
+patent license to make, have made, use, offer to sell, sell, import and
+otherwise transfer the Package with respect to any patent claims
+licensable by the Copyright Holder that are necessarily infringed by the
+Package. If you institute patent litigation (including a cross-claim or
+counterclaim) against any party alleging that the Package constitutes
+direct or contributory patent infringement, then this Artistic License
+to you shall terminate on the date that such litigation is filed.</p>
+
+<p>Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
+AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
+YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
+CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/manukeerampanal/neverbounce">Neverbounce</a> is maintained by <a href="https://github.com/manukeerampanal">manukeerampanal</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
