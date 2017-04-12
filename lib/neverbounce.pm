@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use JSON;
 require Exporter;
 $NB_API_VERSION = '3.1';
-our $VERSION    = '0.06';
+our $VERSION    = '0.07';
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw();
 %result_details = (
