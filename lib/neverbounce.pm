@@ -961,7 +961,7 @@ L<http://cpanratings.perl.org/d/neverbounce>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/neverbounce/>
+L<http://search.cpan.org/perldoc?neverbounce>
 
 =back
 
