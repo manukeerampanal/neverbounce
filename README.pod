@@ -426,7 +426,7 @@ perldoc command.
 You can also look for information at:
 
     GitHub: Development tracker (report bugs and suggesitions here)
-		https://github.com/manukeerampanal/neverbounce
+	https://github.com/manukeerampanal/neverbounce
 
     RT, CPAN's request tracker (report bugs here)
         http://rt.cpan.org/NoAuth/Bugs.html?Dist=neverbounce
@@ -438,7 +438,7 @@ You can also look for information at:
         http://cpanratings.perl.org/d/neverbounce
 
     Search CPAN
-        http://search.cpan.org/dist/neverbounce/
+        http://search.cpan.org/perldoc?neverbounce
 
 
 =head1 LICENSE AND COPYRIGHT
